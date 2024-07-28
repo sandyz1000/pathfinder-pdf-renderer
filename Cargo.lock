@@ -662,6 +662,13 @@ dependencies = [
 [[package]]
 name = "convert"
 version = "0.1.0"
+dependencies = [
+ "pathfinder_export",
+ "pathfinder_geometry 0.5.1 (git+https://github.com/servo/pathfinder?rev=6ef6ccb)",
+ "pdf",
+ "pdf_render",
+ "structopt",
+]
 
 [[package]]
 name = "core-foundation"
