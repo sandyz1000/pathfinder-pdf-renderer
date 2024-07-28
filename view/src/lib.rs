@@ -1,30 +1,42 @@
-#[macro_use] extern crate log;
+// #[macro_use]
+// extern crate log;
+
+pub mod viewer;
+pub mod gl;
+pub mod native;
+pub mod wasm;
 
 use std::sync::Arc;
-use pathfinder_view::{Config, Interactive, Context, Emitter, view::{ElementState, KeyCode, KeyEvent, ModifiersState}};
-use pathfinder_renderer::scene::Scene;
 use pathfinder_geometry::vector::Vector2F;
-
-use pdf::file::{File as PdfFile, Cache as PdfCache, Log};
+use pathfinder_renderer::scene::Scene;
+use js_sys::Uint8Array;
 use pdf::any::AnySync;
-use pdf::PdfError;
 use pdf::backend::Backend;
-use pdf_render::{Cache, SceneBackend, page_bounds, render_page};
+use pdf::file::{Cache as PdfCache, File as PdfFile, Log};
+use pdf::PdfError;
+use pdf_render::{page_bounds, render_page, Cache, SceneBackend};
+use wasm::WasmView;
+use winit::{
+    event::{ElementState, KeyEvent, Modifiers},
+    keyboard::{KeyCode, ModifiersState, PhysicalKey},
+};
 
-#[cfg(target_arch = "wasm32")]
-use pathfinder_view::WasmView;
+pub use viewer::*;
+use wasm_bindgen::prelude::*;
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
 pub struct PdfView<B: Backend, OC, SC, L> {
     file: PdfFile<B, OC, SC, L>,
     num_pages: usize,
     cache: Cache,
 }
+
 impl<B, OC, SC, L> PdfView<B, OC, SC, L>
 where
     B: Backend + 'static,
     OC: PdfCache<Result<AnySync, Arc<PdfError>>> + 'static,
     SC: PdfCache<Result<Arc<[u8]>, Arc<PdfError>>> + 'static,
-    L: Log
+    L: Log,
 {
     pub fn new(file: PdfFile<B, OC, SC, L>) -> Self {
         PdfView {
@@ -34,23 +46,35 @@ where
         }
     }
 }
+
 impl<B, OC, SC, L> Interactive for PdfView<B, OC, SC, L>
 where
     B: Backend + 'static,
     OC: PdfCache<Result<AnySync, Arc<PdfError>>> + 'static,
     SC: PdfCache<Result<Arc<[u8]>, Arc<PdfError>>> + 'static,
-    L: Log + 'static
+    L: Log + 'static,
 {
     type Event = Vec<u8>;
     fn title(&self) -> String {
-        self.file.trailer.info_dict.as_ref()
+        self.file
+            .trailer
+            .info_dict
+            .as_ref()
             .and_then(|info| info.title.as_ref())
             .and_then(|p| p.to_string().ok())
             .unwrap_or_else(|| "PDF View".into())
     }
     fn init(&mut self, ctx: &mut Context, sender: Emitter<Self::Event>) {
         ctx.num_pages = self.num_pages;
-        ctx.set_icon(image::load_from_memory_with_format(include_bytes!("../../logo.png"), image::ImageFormat::Png).unwrap().to_rgba8().into());
+        ctx.set_icon(
+            image::load_from_memory_with_format(
+                include_bytes!("../../logo.png"),
+                image::ImageFormat::Png,
+            )
+            .unwrap()
+            .to_rgba8()
+            .into(),
+        );
     }
     fn scene(&mut self, ctx: &mut Context) -> Scene {
         info!("drawing page {}", ctx.page_nr());
@@ -64,7 +88,9 @@ where
         backend.finish()
     }
     fn mouse_input(&mut self, ctx: &mut Context, page: usize, pos: Vector2F, state: ElementState) {
-        if state != ElementState::Pressed { return; }
+        if state != ElementState::Pressed {
+            return;
+        }
         info!("x={}, y={}", pos.x(), pos.y());
     }
     fn keyboard_input(&mut self, ctx: &mut Context, state: ModifiersState, event: KeyEvent) {
@@ -75,28 +101,18 @@ where
             let page = ctx.page_nr();
             match event.physical_key {
                 KeyCode::ArrowRight => ctx.goto_page(page + 10),
-                KeyCode::ArrowLeft =>  ctx.goto_page(page.saturating_sub(10)),
-                _ => return
+                KeyCode::ArrowLeft => ctx.goto_page(page.saturating_sub(10)),
+                _ => return,
             }
         }
         match event.physical_key {
             KeyCode::ArrowRight | KeyCode::PageDown => ctx.next_page(),
             KeyCode::ArrowLeft | KeyCode::PageUp => ctx.prev_page(),
-            _ => return
+            _ => return,
         }
     }
 }
 
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-
-#[cfg(target_arch = "wasm32")]
-use js_sys::Uint8Array;
-
-#[cfg(target_arch = "wasm32")]
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-
-#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(start)]
 pub fn run() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
@@ -104,9 +120,12 @@ pub fn run() {
     warn!("test");
 }
 
-#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-pub fn show(canvas: HtmlCanvasElement, context: WebGl2RenderingContext, data: &Uint8Array) -> WasmView {
+pub fn show(
+    canvas: HtmlCanvasElement,
+    context: WebGl2RenderingContext,
+    data: &Uint8Array,
+) -> WasmView {
     use pathfinder_resources::embedded::EmbeddedResourceLoader;
 
     let data: Vec<u8> = data.to_vec();
@@ -118,10 +137,5 @@ pub fn show(canvas: HtmlCanvasElement, context: WebGl2RenderingContext, data: &U
     let mut config = Config::new(Box::new(EmbeddedResourceLoader));
     config.zoom = false;
     config.pan = false;
-    WasmView::new(
-        canvas,
-        context,
-        config,
-        Box::new(view) as _
-    )
+    WasmView::new(canvas, context, config, Box::new(view) as _)
 }

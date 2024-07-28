@@ -1,15 +1,15 @@
 [package]
 name = "pdf2image"
 version = "0.1.0"
-authors = ["Sebastian K <s3bk@protonmail.com>"]
+authors = ["Sandip Dey <sandip.dey1988@yahoo.com>", "Sebastian K <s3bk@protonmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pdf = { git = "https://github.com/pdf-rs/pdf" }
+pdf = { workspace = true }
 pdf_render = { path = "../../render" }
-argh = "*"
-pathfinder_rasterize = { path = "../../../pathfinder_rasterize" } # git = "https://github.com/s3bk/pathfinder_rasterizer" }
-pathfinder_geometry = { git = "https://github.com/servo/pathfinder" }
-env_logger = "*"
+argh = "0.1.12"
+pathfinder_rasterize = { git = "https://github.com/sandyz1000/pathfinder_rasterize", rev="5b8e827" }
+pathfinder_geometry = { workspace = true }
+env_logger = "0.11.5"

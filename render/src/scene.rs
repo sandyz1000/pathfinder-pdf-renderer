@@ -1,9 +1,9 @@
 use pathfinder_color::{ColorF, ColorU};
 use pathfinder_content::{
     fill::FillRule,
-    stroke::{OutlineStrokeToFill},
+    stroke::OutlineStrokeToFill,
     outline::Outline,
-    pattern::{Pattern},
+    pattern::Pattern,
     dash::OutlineDash,
 };
 use pathfinder_renderer::{
@@ -11,7 +11,7 @@ use pathfinder_renderer::{
     paint::{PaintId, Paint},
 };
 use pathfinder_geometry::{
-    vector::{Vector2F},
+    vector::Vector2F,
     rect::RectF, transform2d::Transform2F,
 };
 use pdf::object::{Ref, XObject, ImageXObject, Resolve, Resources, MaybeRef};

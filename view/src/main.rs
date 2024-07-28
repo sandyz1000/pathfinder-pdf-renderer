@@ -2,10 +2,10 @@ use pathfinder_renderer::gpu::options::RendererLevel;
 use pathfinder_view::{show, Config};
 use pathfinder_resources::embedded::EmbeddedResourceLoader;
 use pathfinder_color::ColorF;
-
 use pdf::file::FileOptions;
 use pdf_view::PdfView;
-
+use crate::viewer::{Interactive, Config, Context};
+use crate::Icon;
 
 fn main() {
     env_logger::init();

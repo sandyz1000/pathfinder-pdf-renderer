@@ -1,7 +1,10 @@
 [package]
 name = "pdf_render"
 version = "0.1.0"
-authors = ["Sebastian Köln <s3bk@protonmail.com>"]
+authors = [
+    "Sandip Dey <sandip.dey1988@yahoo.com>",
+    "Sebastian Köln <s3bk@protonmail.com>",
+]
 edition = "2021"
 
 [features]
@@ -12,29 +15,29 @@ name = "render"
 harness = false
 
 [dependencies.pdf]
-default-features=false 
+workspace = true
+default-features = false
 features = ["cache", "dump"]
-git = "https://github.com/pdf-rs/pdf"
 
 [dependencies]
-pathfinder_renderer = { git = "https://github.com/servo/pathfinder" }
-pathfinder_color = { git = "https://github.com/servo/pathfinder" }
-pathfinder_geometry = { git = "https://github.com/servo/pathfinder" }
-pathfinder_resources = { git = "https://github.com/servo/pathfinder" }
-pathfinder_content = { git = "https://github.com/servo/pathfinder" }
+pathfinder_renderer = { workspace = true }
+pathfinder_color = { workspace = true }
+pathfinder_geometry = { workspace = true }
+pathfinder_resources = { workspace = true }
+pathfinder_content = { workspace = true }
 log = "0.4"
-font = { git = "https://github.com/pdf-rs/font" }
-pdf_encoding = "0.4"
-itertools = "*"
-image = "0.24.2"
-instant = "*"
-custom_debug_derive = "*"
-globalcache = { git = "https://github.com/s3bk/cachelib", features = ["sync"] }
-istring = { git = "https://github.com/s3bk/istring" }
-once_cell = "*"
-serde_json = "*"
-glyphmatcher = { git = "https://github.com/s3bk/glyphmatcher" }
+font = { workspace = true }
+pdf_encoding = { workspace = true }
+itertools = { workspace = true }
+image = { workspace = true }
+instant = { workspace = true }
+custom_debug_derive = { workspace = true }
+globalcache = { workspace = true, features = ["sync"] }
+istring = { workspace = true }
+once_cell = { workspace = true }
+serde_json = { workspace = true }
+glyphmatcher = { workspace = true }
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.5.1"
 env_logger = "*"

@@ -1,39 +1,27 @@
 [workspace]
-members = [
-    "render",
-    "view",
-    "examples/pdf2image",
-]
-[patch.crates-io]
-pathfinder_gl = { git = "https://github.com/servo/pathfinder" }
-pathfinder_webgl = { git = "https://github.com/servo/pathfinder" }
-pathfinder_gpu = { git = "https://github.com/servo/pathfinder" }
-pathfinder_content = { git = "https://github.com/servo/pathfinder" }
-pathfinder_color = { git = "https://github.com/servo/pathfinder" }
-pathfinder_geometry = { git = "https://github.com/servo/pathfinder" }
-pathfinder_renderer = { git = "https://github.com/servo/pathfinder" }
-pathfinder_resources = { git = "https://github.com/servo/pathfinder" }
-pathfinder_export = { git = "https://github.com/servo/pathfinder" }
-pathfinder_simd = { git = "https://github.com/servo/pathfinder" }
+members = ["render", "view", "examples/pdf2image", "examples/convert", "wasm"]
 
-
-[patch."https://github.com/s3bk/pathfinder_view"]
-pathfinder_view = { path = "../pathfinder_view", features=["icon"] }
-
-[patch."https://github.com/pdf-rs/pdf"]
-pdf = { path = "../pdf/pdf", default-features=false }
-
-#[patch."https://github.com/pdf-rs/font"]
-#font = { path = "../font" }
-
-[patch."https://github.com/servo/pathfinder"]
-pathfinder_gl = { path = "../pathfinder/gl" }
-pathfinder_webgl = { path = "../pathfinder/webgl" }
-pathfinder_gpu = { path = "../pathfinder/gpu" }
-pathfinder_content = { path = "../pathfinder/content" }
-pathfinder_color = { path = "../pathfinder/color" }
-pathfinder_renderer = { path = "../pathfinder/renderer" }
-pathfinder_resources = { path = "../pathfinder/resources" }
-pathfinder_export = { path = "../pathfinder/export" }
-pathfinder_simd = { path = "../pathfinder/simd" }
-pathfinder_geometry = { path = "../pathfinder/geometry" }
+[workspace.dependencies]
+pathfinder_gl = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_webgl = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_gpu = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_content = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_color = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_geometry = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_renderer = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_resources = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_export = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_simd = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pdf = { git = "https://github.com/pdf-rs/pdf", default-features = false, rev = "b0f40b6" }
+font = { git = "https://github.com/pdf-rs/font" }
+pdf_encoding = "0.4"
+itertools = "0.13.0"
+image = "0.25.2"
+instant = "*"
+custom_debug_derive = "*"
+globalcache = { git = "https://github.com/s3bk/cachelib", features = ["sync"] }
+istring = { git = "https://github.com/s3bk/istring" }
+once_cell = "1.19.0"
+serde_json = "1.0.120"
+glyphmatcher = { git = "https://github.com/s3bk/glyphmatcher" }
+log = { version = "0.4" }

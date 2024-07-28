@@ -4,7 +4,7 @@ use pathfinder_geometry::{
 };
 use pathfinder_content::{
     fill::FillRule,
-    stroke::{StrokeStyle},
+    stroke::StrokeStyle,
     outline::Outline,
 };
 
