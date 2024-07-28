@@ -12,7 +12,6 @@ use winit::keyboard::ModifiersState;
 use winit::platform::run_return::EventLoopExtRunReturn;
 
 
-
 struct Emitter<E: 'static>(EventLoopProxy<E>);
 
 impl<E: 'static> Emitter<E> {
