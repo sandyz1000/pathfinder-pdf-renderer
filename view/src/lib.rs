@@ -129,9 +129,9 @@ pub fn show(
     use pathfinder_resources::embedded::EmbeddedResourceLoader;
 
     let data: Vec<u8> = data.to_vec();
-    info!("got {} bytes of data", data.len());
+    log::info!("got {} bytes of data", data.len());
     let file = PdfFile::from_data(data).expect("failed to parse PDF");
-    info!("got the file");
+    log::info!("got the file");
     let view = PdfView::new(file);
 
     let mut config = Config::new(Box::new(EmbeddedResourceLoader));
