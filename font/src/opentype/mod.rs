@@ -20,8 +20,8 @@ use pathfinder_content::outline::Outline;
 use pathfinder_geometry::{vector::Vector2F, transform2d::Transform2F, rect::RectF};
 use itertools::Either;
 
-#[cfg(feature="svg")]
-use crate::svg::{SvgTable, parse_svg, SvgGlyph};
+// #[cfg(feature="svg")]
+// use crate::svg::{SvgTable, parse_svg, SvgGlyph};
 
 pub mod cmap;
 pub mod gpos;
@@ -61,8 +61,8 @@ pub struct OpenTypeFont {
     vmetrics: Option<VMetrics>,
 
     pub name_map: HashMap<String, u16>,
-    #[cfg(feature="svg")]
-    svg:  Option<SvgTable>,
+    // #[cfg(feature="svg")]
+    // svg:  Option<SvgTable>,
 
     font_matrix: Transform2F,
     num_glyphs: u32,
@@ -110,8 +110,8 @@ impl OpenTypeFont {
             outlines = glyf.map(|shapes| (0 .. shapes.len()).filter_map(|idx| get_outline(&shapes, idx as u32)).collect()).unwrap_or_default();
         }
 
-        #[cfg(feature="svg")]
-        let svg = t!(tables.get(b"SVG ").map(|data| parse_svg(data)).transpose());
+        // #[cfg(feature="svg")]
+        // let svg = t!(tables.get(b"SVG ").map(|data| parse_svg(data)).transpose());
         
         let maxp = t!(tables.get(b"maxp").map(parse_maxp).transpose());
         let num_glyphs = maxp.as_ref().map(|maxp| maxp.num_glyphs as u32).unwrap_or(outlines.len() as u32);
@@ -163,8 +163,8 @@ impl OpenTypeFont {
             encoding,
             name_map,
 
-            #[cfg(feature="svg")]
-            svg,
+            // #[cfg(feature="svg")]
+            // svg,
 
             font_matrix,
             num_glyphs,
@@ -211,10 +211,11 @@ impl Font for OpenTypeFont {
         self.outlines.get(gid.0 as usize).map(|o| o.len() == 0).unwrap_or(true)
     }
 
-    #[cfg(feature="svg")]
-    fn svg_glyph(&self, gid: GlyphId) -> Option<&SvgGlyph> {
-        self.svg.as_ref().and_then(|svg| svg.glyphs.get(&(gid.0 as u16)))
-    }
+    // #[cfg(feature="svg")]
+    // fn svg_glyph(&self, gid: GlyphId) -> Option<&SvgGlyph> {
+    //     self.svg.as_ref().and_then(|svg| svg.glyphs.get(&(gid.0 as u16)))
+    // }
+
     fn gid_for_codepoint(&self, codepoint: u32) -> Option<GlyphId> {
         match self.cmap {
             Some(ref cmap) => cmap.get_codepoint(codepoint).map(GlyphId),

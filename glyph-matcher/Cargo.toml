@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 font = { path = "../font", features=["cff", "opentype"] }
-pdf_encoding = { workspace=true }
+pdf_encoding = { path = "../encoding" }
 pathfinder_content = { workspace=true }
 pathfinder_geometry = { workspace=true }
 itertools = "*"

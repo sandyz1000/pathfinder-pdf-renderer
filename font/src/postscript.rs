@@ -707,7 +707,7 @@ impl Vm {
                         while val < limit {
                             self.push(Item::Int(val));
                             for item in &proc_array {
-                                self.exec(item.clone(), input);
+                                self.exec(item.clone(), input)?;
                             }
                             val += increment;
                         }
@@ -741,7 +741,7 @@ impl Vm {
             }
             Operator::Exec => {
                 let item = self.pop();
-                self.exec(item, input);
+                self.exec(item, input)?;
             }
             Operator::Eq => {
                 let (a, b) = self.pop_tuple()?;
@@ -979,7 +979,7 @@ impl Vm {
                             Some(mut data) if data.len() > 4 => {
                                 Decoder::file().decode_inline(&mut data);
                                 debug!("data: {}", String::from_utf8_lossy(&data));
-                                self.parse_and_exec(slice!(data, 4..));
+                                self.parse_and_exec(slice!(data, 4..))?;
                             }
                             _ => {
                                 let decoded = Decoder::file().decode(input.data, 4);

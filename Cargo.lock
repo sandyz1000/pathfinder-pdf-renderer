@@ -2656,15 +2656,6 @@ dependencies = [
 
 [[package]]
 name = "pdf_encoding"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7896aa5621ac2686e0744f6d371bd216ada635ed5b6f4833d56692edd6c7f699"
-dependencies = [
- "lazy_static",
-]
-
-[[package]]
-name = "pdf_encoding"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed7468173909bb32dbc74ca454c82dfdfe994ad1133ddf78d6c31715c9b88c40"
@@ -2675,8 +2666,6 @@ dependencies = [
 [[package]]
 name = "pdf_encoding"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07793d65f6165493079ab18885b7d945a55e683615a68e1419ba3e8ebf5b7631"
 dependencies = [
  "lazy_static",
 ]
@@ -2733,7 +2722,7 @@ dependencies = [
  "pathfinder_resources",
  "pathfinder_webgl",
  "pdf",
- "pdf_encoding 0.1.0",
+ "pdf_encoding 0.4.0",
  "pdf_render",
  "raw-window-handle",
  "structopt",

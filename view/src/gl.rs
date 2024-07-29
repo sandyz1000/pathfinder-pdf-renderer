@@ -15,7 +15,7 @@ use pathfinder_renderer::{
     scene::Scene,
 };
 
-use crate::util::round_v_to_16;
+use crate::viewer::round_v_to_16;
 use crate::Config;
 use gl;
 use glutin::{

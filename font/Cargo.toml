@@ -20,7 +20,7 @@ math = []
 default = ["opentype"]
 
 [dependencies]
-pdf_encoding = "0.4"
+pdf_encoding = { path = "../encoding" }
 pathfinder_geometry = { workspace = true }
 pathfinder_content = { workspace = true }
 pathfinder_color = { workspace = true }

@@ -10,6 +10,7 @@ use winit::event::{
 use winit::event_loop::{ControlFlow, EventLoopProxy};
 use winit::keyboard::ModifiersState;
 use winit::platform::run_return::EventLoopExtRunReturn;
+use crate::Interactive;
 
 
 struct Emitter<E: 'static>(EventLoopProxy<E>);

@@ -7,6 +7,7 @@ members = [
     "wasm",
     "font",
     "glyph-matcher",
+    "encoding"
 ]
 
 [workspace.dependencies]
@@ -21,7 +22,7 @@ pathfinder_resources = { git = "https://github.com/servo/pathfinder", rev = "6ef
 pathfinder_export = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pathfinder_simd = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pdf = { git = "https://github.com/pdf-rs/pdf", default-features = false, rev = "b0f40b6" }
-pdf_encoding = "0.4"
+
 itertools = "0.13.0"
 image = "0.25.2"
 instant = "*"

@@ -1,0 +1,3 @@
+[submodule "encoding/agl-aglfn"]
+	path = encoding/agl-aglfn
+	url = https://github.com/adobe-type-tools/agl-aglfn/

@@ -1,10 +1,12 @@
-use pathfinder_geometry::{transform2d::Transform2F, vector::Vector2F};
-use pathfinder_renderer::gpu::renderer::Renderer;
+use std::marker::PhantomData;
+
+use pathfinder_geometry::{transform2d::Transform2F, vector::{vec2f, Vector2F}};
+use pathfinder_renderer::gpu::{options::RendererMode, renderer::Renderer};
 use pathfinder_webgl::WebGlDevice;
-use web_sys::{Event, HtmlCanvasElement, KeyboardEvent, MouseEvent, WheelEvent, Window};
+use web_sys::{Event, HtmlCanvasElement, KeyboardEvent, MouseEvent, WebGl2RenderingContext, WheelEvent, Window};
 use winit::{event::{ElementState, KeyEvent, Modifiers, RawKeyEvent}, keyboard::{KeyCode, PhysicalKey}};
 
-use crate::{Context, Interactive};
+use crate::{Config, Context, Interactive};
 
 
 pub struct Emitter<T>(PhantomData<T>);

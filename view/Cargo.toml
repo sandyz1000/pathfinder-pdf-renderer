@@ -31,8 +31,8 @@ pathfinder_gl = { workspace = true }
 log = { workspace = true }
 structopt = "0.3"
 font = { path = "../font" }
-# pdf_encoding = { workspace = true }
-pdf_encoding = "0.1"
+pdf_encoding = { path = "../encoding" }
+# pdf_encoding = "0.1"
 itertools = { workspace = true }
 image = { workspace = true }
 

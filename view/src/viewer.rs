@@ -19,8 +19,7 @@ use pathfinder_renderer::{
     scene::{Scene, SceneSink},
 };
 use pathfinder_resources::ResourceLoader;
-use pathfinder_webgl::WebGlDevice;
-use std::marker::PhantomData;
+
 use winit::window::Icon;
 use winit::{
     event::{ElementState, KeyEvent, Modifiers},

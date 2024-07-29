@@ -1,3 +1,4 @@
+#![allow(unused)]
 #![cfg_attr(feature="unstable", feature(thread_local, type_alias_impl_trait))]
 #[macro_use] extern crate log;
 #[macro_use] extern crate slotmap;
@@ -69,10 +70,10 @@ pub trait Font: 'static {
     
     fn is_empty_glyph(&self, gid: GlyphId) -> bool;
 
-    #[cfg(feature="svg")]
-    fn svg_glyph(&self, gid: GlyphId) -> Option<&SvgGlyph> {
-        None
-    }
+    // #[cfg(feature="svg")]
+    // fn svg_glyph(&self, gid: GlyphId) -> Option<&SvgGlyph> {
+    //     None
+    // }
 
     /// Get the *gid* for the given codepoint in the "native encoding" of this font.
     ///
@@ -183,8 +184,8 @@ mod eexec;
 #[cfg(feature="woff")]
 mod woff;
 
-#[cfg(feature="svg")]
-mod svg;
+// #[cfg(feature="svg")]
+// mod svg;
 
 pub use error::FontError;
 #[cfg(feature="opentype")]
@@ -240,6 +241,7 @@ impl From<f32> for Value {
         Value::Float(v)
     }
 }
+
 impl Value {
     #[inline]
     fn to_int(self) -> Result<i32, FontError> {
@@ -248,6 +250,7 @@ impl Value {
             Value::Float(_) => Err(FontError::TypeError("tried to cast a float to int"))
         }
     }
+
     #[inline]
     fn to_uint(self) -> Result<u32, FontError> {
         match self {

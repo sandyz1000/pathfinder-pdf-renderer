@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::io::{self, Read};
 
 pub struct Decoder {
