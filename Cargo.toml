@@ -2,15 +2,16 @@
 members = [
     "render",
     "view",
-    "examples/pdf2image",
-    "examples/convert",
     "wasm",
     "font",
     "glyph-matcher",
-    "encoding"
+    "encoding", 
+    "rasterize",
+    "examples/*",
 ]
 
 [workspace.dependencies]
+pathfinder_canvas = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pathfinder_gl = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pathfinder_webgl = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pathfinder_gpu = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
@@ -21,6 +22,8 @@ pathfinder_renderer = { git = "https://github.com/servo/pathfinder", rev = "6ef6
 pathfinder_resources = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pathfinder_export = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
 pathfinder_simd = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+pathfinder_svg = { git = "https://github.com/servo/pathfinder", rev = "6ef6ccb" }
+
 pdf = { git = "https://github.com/pdf-rs/pdf", default-features = false, rev = "b0f40b6" }
 
 itertools = "0.13.0"
