@@ -1,5 +1,6 @@
+#![allow(unused)]
 use itertools::Itertools;
-use pathfinder_geometry::{vector::Vector2F};
+use pathfinder_geometry::vector::Vector2F;
 use pathfinder_content::outline::Contour;
 
 use crate::{max, min};

@@ -521,7 +521,7 @@ impl Vm {
         };
         
         for item in &array {
-            self.exec(item.clone(), input);
+            self.exec(item.clone(), input).unwrap();
         }
     }
     fn get_dict(&self, key: DictKey) -> &Dictionary {

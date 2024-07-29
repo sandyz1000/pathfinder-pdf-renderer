@@ -9,8 +9,7 @@ use nom::{
     character::complete::{one_of, digit0, digit1},
     branch::alt,
     multi::many0,
-    error::{make_error, ErrorKind, VerboseError, ParseError},
-    Err::Failure
+    error::{ErrorKind, VerboseError, ParseError}
 };
 use decorum::R32;
 use crate::{R, FontError, ParseResult};

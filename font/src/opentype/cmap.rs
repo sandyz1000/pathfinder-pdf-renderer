@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::RangeInclusive;
 use pdf_encoding::Encoding;
-use crate::{GlyphId, R, parsers::*, FontError};
+use crate::{GlyphId, parsers::*, FontError};
 use nom::{
     number::complete::{be_u8, be_u16, be_u32, be_u24},
     bytes::complete::take,

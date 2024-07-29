@@ -1,4 +1,4 @@
-use crate::{R, parsers::*, FontError};
+use crate::{parsers::*, FontError};
 use super::parse_class_def;
 use nom::{
     number::complete::{be_u16},

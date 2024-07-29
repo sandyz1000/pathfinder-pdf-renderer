@@ -5,7 +5,7 @@ use nom::{
     bytes::complete::take,
     sequence::tuple,
 };
-use crate::{R, GlyphId, FontError};
+use crate::{GlyphId, FontError};
 use crate::parsers::{iterator_n};
 use crate::opentype::{parse_lookup_list, coverage_table, tag, Tag};
 

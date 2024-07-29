@@ -102,7 +102,7 @@ pub fn font_uni_list(
         } else {
             None
         }
-    } else if let Some(cff) = font.downcast_ref::<CffFont>() {
+    } else if let Some(_) = font.downcast_ref::<CffFont>() {
         println!("CFF");
         None
     } else if let Some(otf) = font.downcast_ref::<OpenTypeFont>() {
@@ -190,7 +190,7 @@ impl<I: Display + PartialEq> ShapeDb<I> {
         let mut candiates: Vec<_> = candiates.into_iter().collect();
         candiates.sort_by_key(|t| t.1);
 
-        for &(idx, n) in candiates.iter().rev() {
+        for &(idx, _) in candiates.iter().rev() {
             let e = &self.entries[idx];
             if let Some(report) = report.as_deref_mut() {
                 let _ = writeln!(report, "<div>candiate <span>{}</span>", e.data);
@@ -291,7 +291,7 @@ fn points_set(contour: &Contour) -> HashSet<(u16, u16)> {
 
 pub fn check_font(
     db: &ShapeDb<SmallString>,
-    ps_name: &str,
+    _ps_name: &str,
     font: &(dyn Font + Sync + Send),
     mut report: Option<&mut String>,
 ) -> Option<HashMap<GlyphId, SmallString>> {

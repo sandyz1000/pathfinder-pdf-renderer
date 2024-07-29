@@ -2,7 +2,7 @@ use nom::{
     number::complete::{be_i16, be_u16},
     sequence::{tuple},
 };
-use crate::{R, FontError};
+use crate::FontError;
 use crate::parsers::{*};
 use crate::opentype::{tag, Tag};
 
