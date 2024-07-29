@@ -30,7 +30,7 @@ pathfinder_webgl = { workspace = true }
 pathfinder_gl = { workspace = true }
 log = { workspace = true }
 structopt = "0.3"
-font = { workspace = true }
+font = { path = "../font" }
 # pdf_encoding = { workspace = true }
 pdf_encoding = "0.1"
 itertools = { workspace = true }

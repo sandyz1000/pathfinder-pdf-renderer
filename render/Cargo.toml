@@ -26,7 +26,6 @@ pathfinder_geometry = { workspace = true }
 pathfinder_resources = { workspace = true }
 pathfinder_content = { workspace = true }
 log = "0.4"
-font = { workspace = true }
 pdf_encoding = { workspace = true }
 itertools = { workspace = true }
 image = { workspace = true }
@@ -36,7 +35,8 @@ globalcache = { workspace = true, features = ["sync"] }
 istring = { workspace = true }
 once_cell = { workspace = true }
 serde_json = { workspace = true }
-glyphmatcher = { workspace = true }
+font = { path = "../font" }
+glyphmatcher = { path = "../glyphmatcher" }
 
 [dev-dependencies]
 criterion = "0.5.1"

@@ -44,7 +44,7 @@ struct Opt {
 
 
 fn main() -> Result<(), PdfError> {
-    env_logger::init();
+    // env_logger::init();
     let opt = Opt::from_args();
 
     let format = match opt.format.as_str() {
