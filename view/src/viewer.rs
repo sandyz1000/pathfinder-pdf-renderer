@@ -1,30 +1,16 @@
-use js_sys::{Function, Uint8Array};
+// This is taken from >>>
+// https://github.com/s3bk/pathfinder_view/blob/master/src/lib.rs
+
+use crate::show::Backend;
 use pathfinder_color::ColorF;
 use pathfinder_geometry::rect::RectF;
 use pathfinder_geometry::transform2d::Transform2F;
-use pathfinder_geometry::vector::{vec2f, Vector2F, Vector2I};
-use wasm_bindgen::{prelude::*, JsCast};
-use web_sys::{
-    Event, HtmlCanvasElement, InputEvent, KeyboardEvent, MouseEvent, UiEvent,
-    WebGl2RenderingContext, WheelEvent, Window,
-};
+use pathfinder_geometry::vector::{Vector2F, Vector2I};
 
-use pathfinder_renderer::{
-    concurrent::executor::SequentialExecutor,
-    gpu::{
-        options::{DestFramebuffer, RendererLevel, RendererMode, RendererOptions},
-        renderer::Renderer,
-    },
-    options::{BuildOptions, RenderCommandListener, RenderTransform},
-    scene::{Scene, SceneSink},
-};
+use pathfinder_renderer::scene::Scene;
+use pathfinder_renderer::gpu::options::RendererLevel;
 use pathfinder_resources::ResourceLoader;
 
-use winit::window::Icon;
-use winit::{
-    event::{ElementState, KeyEvent, Modifiers},
-    keyboard::{KeyCode, ModifiersState, PhysicalKey},
-};
 
 
 fn round_to_16(i: i32) -> i32 {
@@ -33,63 +19,6 @@ fn round_to_16(i: i32) -> i32 {
 
 pub fn round_v_to_16(v: Vector2I) -> Vector2I {
     Vector2I::new(round_to_16(v.x()), round_to_16(v.y()))
-}
-
-pub trait Interactive: 'static {
-    type Event: std::fmt::Debug + Send + 'static;
-
-    fn scene(&mut self, ctx: &mut Context) -> Scene;
-
-    fn char_input(&mut self, ctx: &mut Context, input: char) {}
-    fn text_input(&mut self, ctx: &mut Context, input: String) {
-        for c in input.chars() {
-            self.char_input(ctx, c);
-        }
-    }
-
-    fn keyboard_input(&mut self, ctx: &mut Context, modifiers: ModifiersState, event: KeyEvent) {
-        match (event.state, modifiers.control_key(), event.physical_key) {
-            (ElementState::Pressed, false, PhysicalKey::Code(KeyCode::PageDown)) => ctx.next_page(),
-            (ElementState::Pressed, false, PhysicalKey::Code(KeyCode::PageUp)) => ctx.prev_page(),
-            (ElementState::Pressed, true, PhysicalKey::Code(KeyCode::Digit1)) => ctx.zoom_by(0.2),
-            (ElementState::Pressed, true, PhysicalKey::Code(KeyCode::Digit2)) => ctx.zoom_by(-0.2),
-            (ElementState::Pressed, true, PhysicalKey::Code(KeyCode::Digit0)) => {
-                ctx.set_zoom(DEFAULT_SCALE)
-            }
-            _ => return,
-        }
-    }
-    fn mouse_input(&mut self, ctx: &mut Context, page: usize, pos: Vector2F, state: ElementState) {}
-    fn cursor_moved(&mut self, ctx: &mut Context, pos: Vector2F) {}
-    fn exit(&mut self, ctx: &mut Context) {}
-    fn title(&self) -> String {
-        "A fantastic window!".into()
-    }
-    fn event(&mut self, ctx: &mut Context, event: Self::Event) {}
-    fn init(&mut self, ctx: &mut Context, sender: Emitter<Self::Event>) {}
-    fn idle(&mut self, ctx: &mut Context) {}
-    fn window_size_hint(&self) -> Option<Vector2F> {
-        None
-    }
-}
-
-impl Interactive for Scene {
-    type Event = ();
-
-    fn init(&mut self, ctx: &mut Context, sender: Emitter<Self::Event>) {
-        ctx.set_view_box(self.view_box());
-    }
-    fn scene(&mut self, ctx: &mut Context) -> Scene {
-        self.clone()
-    }
-    fn window_size_hint(&self) -> Option<Vector2F> {
-        let size = self.view_box().size();
-        if size.is_zero() {
-            None
-        } else {
-            Some(size)
-        }
-    }
 }
 
 pub struct Config {
@@ -120,16 +49,16 @@ impl Config {
 
 pub struct Context {
     // - the window needs a repaint
-    pub(crate) redraw_requested: bool,
+    pub redraw_requested: bool,
     pub page_nr: usize,
     pub num_pages: usize,
     pub scale: f32, // device independend
-    pub(crate) view_center: Vector2F,
-    pub(crate) window_size: Vector2F, // in pixels
-    pub(crate) scale_factor: f32,     // device dependend
-    pub(crate) config: Config,
-    pub(crate) bounds: Option<RectF>,
-    pub(crate) close: bool,
+    pub view_center: Vector2F,
+    pub window_size: Vector2F, // in pixels
+    pub scale_factor: f32,     // device dependend
+    pub config: Config,
+    pub bounds: Option<RectF>,
+    pub close: bool,
     pub update_interval: Option<f32>,
     pub pixel_scroll_factor: Vector2F,
     pub line_scroll_factor: Vector2F,
@@ -244,7 +173,7 @@ impl Context {
         self.check_bounds();
     }
 
-    pub(crate) fn set_scale_factor(&mut self, factor: f32) {
+    pub fn set_scale_factor(&mut self, factor: f32) {
         self.scale_factor = factor;
         self.check_bounds();
         self.request_redraw();
@@ -294,7 +223,25 @@ impl Context {
     }
 }
 
-fn view_box(scene: &Scene) -> RectF {
+
+pub struct Icon {
+    pub data: Vec<u8>,
+    pub width: u32,
+    pub height: u32
+}
+
+
+impl From<image::RgbaImage> for Icon {
+    fn from(img: image::RgbaImage) -> Icon {
+        let (width, height) = img.dimensions();
+        let data = img.into_vec();
+        Icon {
+            width, height, data
+        }
+    }
+}
+
+pub fn view_box(scene: &Scene) -> RectF {
     let view_box = scene.view_box();
     if view_box == RectF::default() {
         scene.bounds()

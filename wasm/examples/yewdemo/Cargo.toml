@@ -1,5 +1,5 @@
 [package]
-name = "yew-reader"
+name = "yewdemo"
 version = "0.1.0"
 edition = "2021"
 authors = ["Sandip Dey <sandip.dey1988@yahoo.com>"]

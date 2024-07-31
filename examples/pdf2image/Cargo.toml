@@ -10,6 +10,6 @@ edition = "2018"
 pdf = { workspace = true }
 pdf_render = { path = "../../render" }
 argh = "0.1.12"
-pathfinder_rasterize = { git = "https://github.com/sandyz1000/pathfinder_rasterize", rev="5b8e827" }
+pathfinder_rasterize = { path = "../../rasterize" }
 pathfinder_geometry = { workspace = true }
 env_logger = "0.11.5"

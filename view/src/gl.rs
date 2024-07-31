@@ -14,24 +14,22 @@ use pathfinder_renderer::{
     options::BuildOptions,
     scene::Scene,
 };
+use winit::raw_window_handle::HasWindowHandle;
 
-use crate::viewer::round_v_to_16;
-use crate::Config;
 use gl;
+
 use glutin::{
-    config::{Api, ConfigTemplate, ConfigTemplateBuilder},
-    context::{ContextApi, PossiblyCurrentContext, Version},
-    display::{Display, GetGlDisplay},
-    prelude::{GlConfig, GlDisplay, NotCurrentGlContextSurfaceAccessor},
+    config::{Api, ConfigTemplateBuilder, GlConfig},
+    context::NotCurrentGlContext,
+    context::{PossiblyCurrentContext, Version},
+    display::{GetGlDisplay, GlDisplay},
     surface::{GlSurface, Surface, WindowSurface},
 };
 use glutin_winit::{DisplayBuilder, GlWindow as GlutinGlWindow};
-use raw_window_handle::HasRawWindowHandle;
-use winit::{
-    dpi::PhysicalSize,
-    event_loop::EventLoop,
-    window::{Window, WindowBuilder},
-};
+use winit::{dpi::PhysicalSize, event_loop::EventLoop, window::Window};
+
+use crate::viewer::round_v_to_16;
+use crate::Config;
 
 pub struct GlWindow {
     gl_context: PossiblyCurrentContext,
@@ -50,7 +48,7 @@ impl GlWindow {
         window_size: Vector2F,
         config: &Config,
     ) -> Self {
-        let window_builder = WindowBuilder::new()
+        let window_builder = Window::default_attributes()
             .with_title(title)
             .with_decorations(config.borders)
             .with_inner_size(PhysicalSize::new(
@@ -66,7 +64,7 @@ impl GlWindow {
         let template_builder = ConfigTemplateBuilder::new()
             .with_alpha_size(8)
             .with_api(api);
-        let display_builder = DisplayBuilder::new().with_window_builder(Some(window_builder));
+        let display_builder = DisplayBuilder::new().with_window_attributes(Some(window_builder));
         let (mut window, gl_config) = display_builder
             .build(event_loop, template_builder, |configs| {
                 configs
@@ -83,16 +81,16 @@ impl GlWindow {
                     .unwrap()
             })
             .unwrap();
-        let mut window = window.unwrap();
+        let window = window.unwrap();
 
-        let raw_window_handle = window.raw_window_handle();
+        let raw_window_handle = window.window_handle().unwrap().as_raw();
 
         let gl_display = gl_config.display();
 
         let context_attributes =
             glutin::context::ContextAttributesBuilder::new().build(Some(raw_window_handle));
 
-        let attrs = window.build_surface_attributes(<_>::default());
+        let attrs = window.build_surface_attributes(<_>::default()).unwrap();
         let gl_surface = unsafe {
             gl_config
                 .display()
@@ -100,12 +98,12 @@ impl GlWindow {
                 .unwrap()
         };
 
-        let mut windowed_context = unsafe {
+        let windowed_context = unsafe {
             gl_display
                 .create_context(&gl_config, &context_attributes)
                 .expect("failed to create context")
         };
-        let current_context = unsafe { windowed_context.make_current(&gl_surface).unwrap() };
+        let current_context = windowed_context.make_current(&gl_surface).unwrap();
 
         gl::load_with(|ptr: &str| {
             gl_display.get_proc_address(unsafe { CStr::from_ptr(ptr.as_ptr().cast()) })
@@ -158,8 +156,8 @@ impl GlWindow {
 
     pub fn resize(&mut self, size: Vector2F) {
         if size != self.window_size {
-            self.window
-                .set_inner_size(PhysicalSize::new(size.x() as u32, size.y() as u32));
+            let physical_size = PhysicalSize::new(size.x() as u32, size.y() as u32);
+            self.window.set_max_inner_size(Some(physical_size));
             self.window.request_redraw();
             self.window_size = size;
         }
@@ -183,15 +181,15 @@ impl GlWindow {
     pub fn scale_factor(&self) -> f32 {
         self.window.scale_factor() as f32
     }
-    
+
     pub fn request_redraw(&self) {
         self.window.request_redraw();
     }
-    
+
     pub fn framebuffer_size(&self) -> Vector2I {
         self.framebuffer_size
     }
-    
+
     pub fn window(&self) -> &Window {
         &self.window
     }

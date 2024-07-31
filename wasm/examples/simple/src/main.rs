@@ -3,7 +3,7 @@ use pathfinder_renderer::gpu::options::RendererLevel;
 use pathfinder_resources::embedded::EmbeddedResourceLoader;
 use pathfinder_color::ColorF;
 use pdf::file::FileOptions;
-use pdf_view::native::show;
+use pdf_view::show::show;
 use pdf_view::{Config, PdfView};
 use crate::viewer::{Interactive, Config, Context};
 use crate::Icon;

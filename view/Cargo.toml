@@ -12,17 +12,14 @@ workspace = true
 default-features = false
 features = ["dump"]
 
-[dependencies.pdf_render]
-path = "../render"
-
 # [dependencies.pathfinder_view]
 # git = "https://github.com/s3bk/pathfinder_view"
 # features = ["icon"]
 
 [dependencies]
 pathfinder_renderer = { workspace = true }
-pathfinder_color = { workspace = true }
 pathfinder_geometry = { workspace = true }
+pathfinder_color = { workspace = true }
 pathfinder_resources = { workspace = true }
 pathfinder_content = { workspace = true }
 pathfinder_export = { workspace = true }
@@ -30,6 +27,7 @@ pathfinder_webgl = { workspace = true }
 pathfinder_gl = { workspace = true }
 log = { workspace = true }
 structopt = "0.3"
+pdf_render = { path = "../render" }
 font = { path = "../font" }
 pdf_encoding = { path = "../encoding" }
 # pdf_encoding = "0.1"
@@ -53,8 +51,7 @@ criterion = "0.3"
 
 [target.'cfg(unix)'.dependencies]
 env_logger = "0.11.5"
-pdf_render = { path = "../render" }
-pathfinder_gl = { git = "https://github.com/servo/pathfinder/", rev = "6ef6ccb" }
+pathfinder_gl = { workspace = true }
 gl = "0.14.0"
 glutin = "0.32.0"
 glutin-winit = "0.5.0"

@@ -2,12 +2,12 @@
 members = [
     "render",
     "view",
-    "wasm",
+    # "wasm",
     "font",
     "glyph-matcher",
     "encoding", 
     "rasterize",
-    "examples/*",
+    # "examples/*",
 ]
 
 [workspace.dependencies]

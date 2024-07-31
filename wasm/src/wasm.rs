@@ -1,16 +1,35 @@
 use std::marker::PhantomData;
 
-use pathfinder_geometry::{transform2d::Transform2F, vector::{vec2f, Vector2F}};
-use pathfinder_renderer::gpu::{options::RendererMode, renderer::Renderer};
+use web_sys::UiEvent;
+use log::*;
+use pathfinder_geometry::rect::RectF;
+use pathfinder_geometry::{
+    transform2d::Transform2F,
+    vector::{vec2f, Vector2F, Vector2I},
+};
+use pdf::file::File as PdfFile;
 use pathfinder_webgl::WebGlDevice;
-use web_sys::{Event, HtmlCanvasElement, KeyboardEvent, MouseEvent, WebGl2RenderingContext, WheelEvent, Window};
-use winit::{event::{ElementState, KeyEvent, Modifiers, RawKeyEvent}, keyboard::{KeyCode, PhysicalKey}};
+use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::{
+    Event, HtmlCanvasElement, KeyboardEvent, MouseEvent, WebGl2RenderingContext, WheelEvent, Window,
+};
+use winit::{
+    event::{ElementState, KeyEvent, Modifiers, RawKeyEvent},
+    keyboard::{KeyCode, PhysicalKey},
+};
 
-use crate::{Config, Context, Interactive};
+use pathfinder_renderer::concurrent::executor::SequentialExecutor;
+use pathfinder_renderer::gpu::{
+    options::{DestFramebuffer, RendererMode, RendererOptions},
+    renderer::Renderer,
+};
+use pathfinder_renderer::options::{BuildOptions, RenderTransform};
+
+use crate::PdfView;
+use pdf_view::{Context, view::Interactive, view_box, Config, Icon};
 
 
-pub struct Emitter<T>(PhantomData<T>);
-
+struct Emitter<T>(PhantomData<T>);
 
 pub fn virtual_key_code(event: &KeyboardEvent) -> Option<KeyCode> {
     Some(match &event.code()[..] {
@@ -359,11 +378,9 @@ impl WasmView {
         };
 
         let key_event: KeyEvent = rkevt.into();
-        self.item.keyboard_input(&mut self.ctx, state, key_event.clone());
+        self.item
+            .keyboard_input(&mut self.ctx, state, key_event.clone());
 
-        if key_event.cancelled {
-            cancel(&event);
-        }
     }
 
     pub fn resize(&mut self, event: &UiEvent) -> bool {
@@ -372,7 +389,7 @@ impl WasmView {
         self.ctx.redraw_requested
     }
 
-    pub fn data(&mut self, data: &Uint8Array) -> bool {
+    pub fn data(&mut self, data: &js_sys::Uint8Array) -> bool {
         self.item.event(&mut self.ctx, data.to_vec());
         self.ctx.redraw_requested
     }
@@ -427,4 +444,31 @@ pub fn keyboard_modifiers(event: &KeyboardEvent) -> Modifiers {
     // alt: event.alt_key(),
     // meta: event.meta_key(),
     Modifiers::default()
+}
+
+#[wasm_bindgen(start)]
+pub fn run() {
+    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+    console_log::init_with_level(log::Level::Info);
+    warn!("test");
+}
+
+#[wasm_bindgen]
+pub fn show(
+    canvas: HtmlCanvasElement,
+    context: WebGl2RenderingContext,
+    data: &js_sys::Uint8Array,
+) -> WasmView {
+    use pathfinder_resources::embedded::EmbeddedResourceLoader;
+
+    let data: Vec<u8> = data.to_vec();
+    log::info!("got {} bytes of data", data.len());
+    let file = PdfFile::from_data(data).expect("failed to parse PDF");
+    log::info!("got the file");
+    let view = PdfView::new(file);
+
+    let mut config = Config::new(Box::new(EmbeddedResourceLoader));
+    config.zoom = false;
+    config.pan = false;
+    WasmView::new(canvas, context, config, Box::new(view) as _)
 }
