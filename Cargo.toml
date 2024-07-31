@@ -2,11 +2,11 @@
 members = [
     "render",
     "view",
-    # "wasm",
     "font",
     "glyph-matcher",
     "encoding", 
     "rasterize",
+    # TODO: Fix the bugs in example
     # "examples/*",
 ]
 

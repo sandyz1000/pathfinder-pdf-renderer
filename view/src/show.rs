@@ -1,53 +1,72 @@
-
-use pathfinder_geometry::vector::{vec2f, Vector2F};
+use crate::config::{Config, Icon};
+use crate::context::{Context, ViewBackend};
+use crate::gl::GlWindow;
+use crate::interactive::{Emitter, Interactive};
 use log::*;
+use pathfinder_geometry::vector::{vec2f, Vector2F};
 use pathfinder_renderer::options::{BuildOptions, RenderTransform};
-use winit::application::ApplicationHandler;
-use winit::window::Window;
+use pathfinder_renderer::scene::Scene;
 use std::time::{Duration, Instant};
+use winit::application::ApplicationHandler;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{
-    ElementState as WinitElementState, Event, InnerSizeWriter, MouseButton, MouseScrollDelta, StartCause, WindowEvent
+    ElementState as WinitElementState, Event, InnerSizeWriter, MouseButton, MouseScrollDelta,
+    StartCause, WindowEvent,
 };
-use winit::event_loop::{ControlFlow, EventLoopProxy};
+use winit::event_loop::{ControlFlow, EventLoop, EventLoopProxy};
 use winit::keyboard::ModifiersState;
-use crate::gl::GlWindow;
-use crate::view::Interactive;
-use crate::{Context, Icon, Config};
+use winit::window::Window;
 
-
-pub struct Emitter<E: 'static>(EventLoopProxy<E>);
-
-impl<E: 'static> Emitter<E> {
-    pub fn send(&self, event: E) {
-        let _ = self.0.send_event(event);
+impl<U: 'static> Emitter<EventLoopProxy<U>> {
+    pub fn send(&self, event: U) {
+        let _ = self.inner.send_event(event);
     }
 }
 
-impl<E: 'static> Clone for Emitter<E> {
-    fn clone(&self) -> Self {
-        Emitter(self.0.clone())
-    }
-}
-
-pub struct Backend {
+pub struct NativeBackend {
     window: GlWindow,
 }
 
-impl Backend {
-    pub fn new(window: GlWindow) -> Backend {
-        Backend { window }
+impl NativeBackend {
+    pub fn new(window: GlWindow) -> NativeBackend {
+        NativeBackend { window }
     }
-    pub fn resize(&mut self, size: Vector2F) {
+}
+
+impl Interactive for Scene {
+    type Event = ();
+    type Backend = NativeBackend;
+
+    fn init(&mut self, ctx: &mut Context<Self::Backend>, sender: Emitter<Self::Event>) {
+        ctx.set_view_box(self.view_box());
+    }
+
+    fn scene(&mut self, ctx: &mut Context<Self::Backend>) -> Scene {
+        self.clone()
+    }
+
+    fn window_size_hint(&self) -> Option<Vector2F> {
+        let size = self.view_box().size();
+        if size.is_zero() {
+            None
+        } else {
+            Some(size)
+        }
+    }
+}
+
+
+impl ViewBackend for NativeBackend {
+    fn resize(&mut self, size: Vector2F) {
         self.window.resize(size);
     }
-    pub fn get_scroll_factors(&self) -> (Vector2F, Vector2F) {
+    fn get_scroll_factors(&self) -> (Vector2F, Vector2F) {
         (
             env_vec("PIXEL_SCROLL_FACTOR").unwrap_or(Vector2F::new(1.0, 1.0)),
             env_vec("LINE_SCROLL_FACTOR").unwrap_or(Vector2F::new(10.0, -10.0)),
         )
     }
-    pub fn set_icon(&mut self, icon: Icon) {
+    fn set_icon(&mut self, icon: Icon) {
         self.window.window().set_window_icon(Some(
             winit::window::Icon::from_rgba(icon.data, icon.width, icon.height).unwrap(),
         ));
@@ -62,19 +81,20 @@ fn env_vec(name: &str) -> Option<Vector2F> {
     Some(Vector2F::new(x, y))
 }
 
-pub fn show<T: Interactive>(mut item: T, config: Config) {
-    use winit::event_loop::{EventLoopBuilder, EventLoop};
-
+pub fn show<T>(mut item: T, config: Config)
+where
+    T: Interactive<Backend = NativeBackend, Event = ()>,
+{
     log::info!("creating event loop");
-    let mut event_loop = EventLoop::with_user_event().build().unwrap();
+    let mut event_loop = EventLoop::<()>::with_user_event().build().unwrap();
 
     let mut cursor_pos = Vector2F::default();
     let mut dragging = false;
 
     let window_size = item.window_size_hint().unwrap_or(vec2f(600., 400.));
     let glwindow = GlWindow::new(&event_loop, item.title(), window_size, &config);
-    let window = glwindow.window().clone();
-    let backend = Backend::new(glwindow);
+    let window = glwindow.window();
+    let backend = NativeBackend::new(glwindow);
     let mut ctx = Context::new(config, backend);
     let scale_factor = ctx.backend.window.scale_factor();
     ctx.set_scale_factor(scale_factor);
@@ -83,7 +103,7 @@ pub fn show<T: Interactive>(mut item: T, config: Config) {
 
     let proxy = event_loop.create_proxy();
 
-    item.init(&mut ctx, Emitter(proxy));
+    item.init(&mut ctx, Emitter { inner: () });
 
     let mut modifiers = ModifiersState::default();
     info!("entering the event loop");
@@ -92,28 +112,33 @@ pub fn show<T: Interactive>(mut item: T, config: Config) {
     // This is ideal for non-game applications that only update in response to user
     // input, and uses significantly less power/CPU time than ControlFlow::Poll.
     event_loop.set_control_flow(ControlFlow::Wait);
-
+    // TODO: Fix here
     // let mut app = App::new(window, ctx, item, modifiers, cursor_pos, dragging);
     // event_loop.run_app(&mut app);
 }
 
-
-
 struct App<I> {
     window: Option<Window>,
-    ctx: Context,
+    ctx: Context<NativeBackend>,
     item: I,
     modifiers: ModifiersState,
-    cursor_pos: Vector2F, 
-    dragging: bool
+    cursor_pos: Vector2F,
+    dragging: bool,
 }
 
 impl<I: Interactive> App<I> {
-    fn new(window: Window, ctx: Context, item: I, modifiers: ModifiersState, cursor_pos: Vector2F, dragging: bool) -> Self {
+    fn new(
+        window: Window,
+        ctx: Context<NativeBackend>,
+        item: I,
+        modifiers: ModifiersState,
+        cursor_pos: Vector2F,
+        dragging: bool,
+    ) -> Self {
         App {
             window: Some(window),
-            ctx, 
-            item, 
+            ctx,
+            item,
             modifiers,
             cursor_pos,
             dragging,
@@ -121,9 +146,13 @@ impl<I: Interactive> App<I> {
     }
 }
 
-impl<I: Interactive> ApplicationHandler for App<I> {
+impl<I: Interactive<Backend = NativeBackend>> ApplicationHandler for App<I> {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        self.window = Some(event_loop.create_window(Window::default_attributes()).unwrap());
+        self.window = Some(
+            event_loop
+                .create_window(Window::default_attributes())
+                .unwrap(),
+        );
     }
 
     fn window_event(
@@ -151,38 +180,41 @@ impl<I: Interactive> ApplicationHandler for App<I> {
                 let scene = self.item.scene(&mut self.ctx);
                 self.ctx.backend.window.render(scene, options);
                 self.ctx.redraw_requested = false;
-            },
+            }
             WindowEvent::ScaleFactorChanged {
                 scale_factor,
                 mut inner_size_writer,
             } => {
-                
                 self.ctx.set_scale_factor(scale_factor as f32);
                 // self.ctx.set_window_size(Vector2F::new(*width as f32, *height as f32));
                 let width = self.ctx.window_size.x().ceil() as u32;
                 let height = self.ctx.window_size.y().ceil() as u32;
                 let new_inner_size = PhysicalSize::new(width, height);
-                inner_size_writer.request_inner_size(new_inner_size);
+                inner_size_writer
+                    .request_inner_size(new_inner_size)
+                    .map_err(|e| log::error!("{:?}", e))
+                    .unwrap();
                 self.ctx.request_redraw();
             }
-            
+
             WindowEvent::Focused { .. } => self.ctx.request_redraw(),
-            
+
             WindowEvent::Resized(PhysicalSize { width, height }) => {
                 let physical_size = Vector2F::new(width as f32, height as f32);
                 self.ctx.window_size = physical_size;
                 self.ctx.check_bounds();
                 self.ctx.request_redraw();
             }
-            
+
             WindowEvent::ModifiersChanged(new_modifiers) => {
                 self.modifiers = new_modifiers.state();
             }
-            
+
             WindowEvent::KeyboardInput { event, .. } => {
-                self.item.keyboard_input(&mut self.ctx, self.modifiers, event);
+                self.item
+                    .keyboard_input(&mut self.ctx, self.modifiers, event);
             }
-            
+
             WindowEvent::CursorMoved {
                 position: PhysicalPosition { x, y },
                 ..
@@ -197,7 +229,7 @@ impl<I: Interactive> ApplicationHandler for App<I> {
                     self.item.cursor_moved(&mut self.ctx, new_pos);
                 }
             }
-            
+
             WindowEvent::MouseInput {
                 button: MouseButton::Left,
                 state,
@@ -207,10 +239,11 @@ impl<I: Interactive> ApplicationHandler for App<I> {
                 (WinitElementState::Released, _) if self.dragging => self.dragging = false,
                 _ => {
                     let page_nr = self.ctx.page_nr;
-                    self.item.mouse_input(&mut self.ctx, page_nr, self.cursor_pos, state);
+                    self.item
+                        .mouse_input(&mut self.ctx, page_nr, self.cursor_pos, state);
                 }
             },
-            
+
             WindowEvent::MouseWheel { delta, .. } => {
                 let delta = match delta {
                     MouseScrollDelta::PixelDelta(PhysicalPosition { x: dx, y: dy }) => {
@@ -230,15 +263,14 @@ impl<I: Interactive> ApplicationHandler for App<I> {
             WindowEvent::CloseRequested => {
                 println!("The close button was pressed; stopping");
                 self.ctx.close();
-            },
-            
+            }
+
             // Event::UserEvent(e) => {
             //     self.item.event(&mut self.ctx, e);
             // }
 
             // Event::MainEventsCleared => item.idle(&mut ctx),
 
-            
             // Event::LoopDestroyed => {
             //     item.exit(&mut ctx);
             // }

@@ -1,53 +1,16 @@
-// This is taken from >>>
-// https://github.com/s3bk/pathfinder_view/blob/master/src/lib.rs
-
-use crate::show::Backend;
-use pathfinder_color::ColorF;
 use pathfinder_geometry::rect::RectF;
 use pathfinder_geometry::transform2d::Transform2F;
 use pathfinder_geometry::vector::{Vector2F, Vector2I};
 
-use pathfinder_renderer::scene::Scene;
-use pathfinder_renderer::gpu::options::RendererLevel;
-use pathfinder_resources::ResourceLoader;
+use crate::config::{Config, Icon};
 
-
-
-fn round_to_16(i: i32) -> i32 {
-    (i + 15) & !0xf
+pub trait ViewBackend {
+    fn resize(&mut self, size: Vector2F);
+    fn get_scroll_factors(&self) -> (Vector2F, Vector2F);
+    fn set_icon(&mut self, icon: Icon);
 }
 
-pub fn round_v_to_16(v: Vector2I) -> Vector2I {
-    Vector2I::new(round_to_16(v.x()), round_to_16(v.y()))
-}
-
-pub struct Config {
-    pub zoom: bool,
-    pub pan: bool,
-    pub borders: bool,
-    pub transparent: bool,
-    pub background: ColorF,
-    pub render_level: RendererLevel,
-    pub resource_loader: Box<dyn ResourceLoader>,
-    pub threads: bool,
-}
-impl Config {
-    pub fn new(resource_loader: Box<dyn ResourceLoader>) -> Self {
-        Config {
-            zoom: true,
-            pan: true,
-            borders: true,
-            transparent: false,
-            background: ColorF::white(),
-            render_level: RendererLevel::D3D9,
-            resource_loader,
-            threads: true,
-        }
-    }
-}
-
-
-pub struct Context {
+pub struct Context<B: ViewBackend> {
     // - the window needs a repaint
     pub redraw_requested: bool,
     pub page_nr: usize,
@@ -62,13 +25,13 @@ pub struct Context {
     pub update_interval: Option<f32>,
     pub pixel_scroll_factor: Vector2F,
     pub line_scroll_factor: Vector2F,
-    pub backend: Backend,
+    pub backend: B,
 }
 
 pub const DEFAULT_SCALE: f32 = 96.0 / 25.4;
 
-impl Context {
-    pub fn new(config: Config, backend: Backend) -> Self {
+impl<B: ViewBackend> Context<B> {
+    pub fn new(config: Config, backend: B) -> Self {
         let (pixel_scroll_factor, line_scroll_factor) = backend.get_scroll_factors();
         Context {
             redraw_requested: true,
@@ -91,7 +54,7 @@ impl Context {
     pub fn request_redraw(&mut self) {
         self.redraw_requested = true;
     }
-    
+
     pub fn goto_page(&mut self, page: usize) {
         let page = page.min(self.num_pages - 1);
         if page != self.page_nr {
@@ -99,25 +62,25 @@ impl Context {
             self.request_redraw();
         }
     }
-    
+
     pub fn next_page(&mut self) {
         self.goto_page(self.page_nr.saturating_add(1));
     }
-    
+
     pub fn prev_page(&mut self) {
         self.goto_page(self.page_nr.saturating_sub(1));
     }
-    
+
     pub fn page_nr(&self) -> usize {
         self.page_nr
     }
-    
+
     pub fn zoom_by(&mut self, log2_factor: f32) {
         self.scale *= 2f32.powf(log2_factor);
         self.check_bounds();
         self.request_redraw();
     }
-    
+
     pub fn set_zoom(&mut self, factor: f32) {
         if factor != self.scale {
             self.scale = factor;
@@ -220,32 +183,5 @@ impl Context {
 
     pub fn set_icon(&mut self, icon: Icon) {
         self.backend.set_icon(icon);
-    }
-}
-
-
-pub struct Icon {
-    pub data: Vec<u8>,
-    pub width: u32,
-    pub height: u32
-}
-
-
-impl From<image::RgbaImage> for Icon {
-    fn from(img: image::RgbaImage) -> Icon {
-        let (width, height) = img.dimensions();
-        let data = img.into_vec();
-        Icon {
-            width, height, data
-        }
-    }
-}
-
-pub fn view_box(scene: &Scene) -> RectF {
-    let view_box = scene.view_box();
-    if view_box == RectF::default() {
-        scene.bounds()
-    } else {
-        view_box
     }
 }

@@ -26,6 +26,7 @@ pub struct SceneBackend<'a> {
     scene: Scene,
     cache: &'a mut Cache,
 }
+
 impl<'a> SceneBackend<'a> {
     pub fn new(cache: &'a mut Cache) -> Self {
         let scene = Scene::new();
@@ -47,6 +48,7 @@ impl<'a> SceneBackend<'a> {
         self.scene.push_paint(&paint)
     }
 }
+
 impl<'a> Backend for SceneBackend<'a> {
     type ClipPathId = ClipPathId;
     fn create_clip_path(&mut self, path: Outline, fill_rule: FillRule, parent: Option<Self::ClipPathId>) -> Self::ClipPathId {

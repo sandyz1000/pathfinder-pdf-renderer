@@ -1,21 +1,29 @@
 use std::marker::PhantomData;
 
-use web_sys::UiEvent;
 use log::*;
 use pathfinder_geometry::rect::RectF;
 use pathfinder_geometry::{
     transform2d::Transform2F,
     vector::{vec2f, Vector2F, Vector2I},
 };
-use pdf::file::File as PdfFile;
+
+use pdf::backend::Backend;
+use pathfinder_renderer::scene::Scene;
+use pdf::any::AnySync;
+use pdf::file::{Cache as PdfCache, File as PdfFile, Log};
+use pdf::PdfError;
+use pdf_render::{page_bounds, render_page, Cache, SceneBackend};
+use std::sync::Arc;
+
 use pathfinder_webgl::WebGlDevice;
 use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::UiEvent;
 use web_sys::{
     Event, HtmlCanvasElement, KeyboardEvent, MouseEvent, WebGl2RenderingContext, WheelEvent, Window,
 };
 use winit::{
     event::{ElementState, KeyEvent, Modifiers, RawKeyEvent},
-    keyboard::{KeyCode, PhysicalKey},
+    keyboard::{KeyCode, PhysicalKey, ModifiersState},
 };
 
 use pathfinder_renderer::concurrent::executor::SequentialExecutor;
@@ -25,11 +33,109 @@ use pathfinder_renderer::gpu::{
 };
 use pathfinder_renderer::options::{BuildOptions, RenderTransform};
 
-use crate::PdfView;
-use pdf_view::{Context, view::Interactive, view_box, Config, Icon};
+use crate::context::{Context, ViewBackend};
+use crate::gl::round_v_to_16;
+use crate::interactive::{Emitter, Interactive};
+use crate::config::{view_box, Config, Icon};
 
 
-struct Emitter<T>(PhantomData<T>);
+// struct Emitter<T>(PhantomData<T>);
+
+pub struct PdfView<B: Backend, OC, SC, L> {
+    file: PdfFile<B, OC, SC, L>,
+    num_pages: usize,
+    cache: Cache,
+}
+
+impl<B, OC, SC, L> PdfView<B, OC, SC, L>
+where
+    B: Backend + 'static,
+    OC: PdfCache<Result<AnySync, Arc<PdfError>>> + 'static,
+    SC: PdfCache<Result<Arc<[u8]>, Arc<PdfError>>> + 'static,
+    L: Log,
+{
+    pub fn new(file: PdfFile<B, OC, SC, L>) -> Self {
+        PdfView {
+            num_pages: file.num_pages() as usize,
+            file,
+            cache: Cache::new(),
+        }
+    }
+}
+
+
+impl<B, OC, SC, L> Interactive for PdfView<B, OC, SC, L>
+where
+    B: Backend + 'static,
+    OC: PdfCache<Result<AnySync, Arc<PdfError>>> + 'static,
+    SC: PdfCache<Result<Arc<[u8]>, Arc<PdfError>>> + 'static,
+    L: Log + 'static
+{
+    type Event = Vec<u8>;
+    type Backend = WasmBackend;
+
+    fn title(&self) -> String {
+        self.file
+            .trailer
+            .info_dict
+            .as_ref()
+            .and_then(|info| info.title.as_ref())
+            .and_then(|p| p.to_string().ok())
+            .unwrap_or_else(|| "PDF View".into())
+    }
+
+    fn init(&mut self, ctx: &mut Context<Self::Backend>, sender: Emitter<Self::Event>) {
+        ctx.num_pages = self.num_pages;
+        ctx.set_icon(
+            image::load_from_memory_with_format(
+                include_bytes!("../../logo.png"),
+                image::ImageFormat::Png,
+            )
+            .unwrap()
+            .to_rgba8()
+            .into(),
+        );
+    }
+
+    fn scene(&mut self, ctx: &mut Context<Self::Backend>) -> Scene {
+        info!("drawing page {}", ctx.page_nr());
+        
+        let page = self.file.get_page(ctx.page_nr as u32).unwrap();
+
+        ctx.set_bounds(page_bounds(&page));
+
+        let mut backend = SceneBackend::new(&mut self.cache);
+        let resolver = self.file.resolver();
+        render_page(&mut backend, &resolver, &page, ctx.view_transform()).unwrap();
+        backend.finish()
+    }
+
+    fn mouse_input(&mut self, ctx: &mut Context<Self::Backend>, page: usize, pos: Vector2F, state: ElementState) {
+        if state != ElementState::Pressed {
+            return;
+        }
+        info!("x={}, y={}", pos.x(), pos.y());
+    }
+
+    fn keyboard_input(&mut self, ctx: &mut Context<Self::Backend>, state: ModifiersState, event: KeyEvent) {
+        if event.state == ElementState::Released {
+            return;
+        }
+        if state.shift_key() {
+            let page = ctx.page_nr();
+            match event.physical_key {
+                PhysicalKey::Code(KeyCode::ArrowRight) => ctx.goto_page(page + 10),
+                PhysicalKey::Code(KeyCode::ArrowLeft) => ctx.goto_page(page.saturating_sub(10)),
+                _ => return,
+            }
+        }
+        match event.physical_key {
+            PhysicalKey::Code(KeyCode::ArrowRight | KeyCode::PageDown) => ctx.next_page(),
+            PhysicalKey::Code(KeyCode::ArrowLeft | KeyCode::PageUp) => ctx.prev_page(),
+            _ => return,
+        }
+    }
+}
 
 pub fn virtual_key_code(event: &KeyboardEvent) -> Option<KeyCode> {
     Some(match &event.code()[..] {
@@ -194,24 +300,38 @@ pub fn virtual_key_code(event: &KeyboardEvent) -> Option<KeyCode> {
     })
 }
 
-pub struct Backend;
+pub struct WasmBackend;
 
-impl Backend {
-    pub fn resize(&mut self, size: Vector2F) {}
-    pub fn get_scroll_factors(&self) -> (Vector2F, Vector2F) {
+impl WasmBackend {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl ViewBackend for WasmBackend {
+    fn resize(&mut self, size: Vector2F) {}
+
+    fn get_scroll_factors(&self) -> (Vector2F, Vector2F) {
         (Vector2F::new(1.0, 1.0), Vector2F::new(10.0, -10.0))
     }
-    pub fn set_icon(&mut self, icon: Icon) {}
+
+    fn set_icon(&mut self, icon: Icon) {}
 }
+
+type ItemType = Box<dyn Interactive<Event = Vec<u8>, Backend=WasmBackend>>;
 
 #[wasm_bindgen]
 pub struct WasmView {
-    item: Box<dyn Interactive<Event = Vec<u8>>>,
-    ctx: Context,
+    item: ItemType,
+    ctx: Context<WasmBackend>,
     window: Window,
     renderer: Renderer<WebGlDevice>,
     framebuffer_size: Vector2F,
     canvas: HtmlCanvasElement,
+}
+
+struct EventProxy<T> {
+    item: T
 }
 
 impl WasmView {
@@ -219,14 +339,14 @@ impl WasmView {
         canvas: HtmlCanvasElement,
         context: WebGl2RenderingContext,
         config: Config,
-        mut item: Box<dyn Interactive<Event = Vec<u8>>>,
+        mut item: ItemType,
     ) -> Self {
         canvas.set_attribute("tabindex", "0").unwrap();
         canvas.set_attribute("contenteditable", "true").unwrap();
 
         let window = web_sys::window().unwrap();
         let scale_factor = scale_factor(&window);
-        let backend = Backend {};
+        let backend = WasmBackend::new();
         let mut ctx = Context::new(config, backend);
         ctx.set_scale_factor(scale_factor);
 
@@ -254,7 +374,7 @@ impl WasmView {
             render_options,
         );
 
-        item.init(&mut ctx, Emitter(PhantomData));
+        item.init(&mut ctx, Emitter { inner: Vec::<u8>::new() });
 
         WasmView {
             item,
@@ -372,15 +492,15 @@ impl WasmView {
             Some(keycode) => keycode,
             None => return,
         };
+        
         let rkevt = RawKeyEvent {
             physical_key: PhysicalKey::Code(keycode),
             state,
         };
 
+        // TODO: Fix here
         let key_event: KeyEvent = rkevt.into();
-        self.item
-            .keyboard_input(&mut self.ctx, state, key_event.clone());
-
+        self.item.keyboard_input(&mut self.ctx, state, key_event.clone());
     }
 
     pub fn resize(&mut self, event: &UiEvent) -> bool {

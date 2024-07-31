@@ -27,9 +27,19 @@ use glutin::{
 };
 use glutin_winit::{DisplayBuilder, GlWindow as GlutinGlWindow};
 use winit::{dpi::PhysicalSize, event_loop::EventLoop, window::Window};
+use crate::config::Config;
 
-use crate::viewer::round_v_to_16;
-use crate::Config;
+
+
+fn round_to_16(i: i32) -> i32 {
+    (i + 15) & !0xf
+}
+
+pub fn round_v_to_16(v: Vector2I) -> Vector2I {
+    Vector2I::new(round_to_16(v.x()), round_to_16(v.y()))
+}
+
+
 
 pub struct GlWindow {
     gl_context: PossiblyCurrentContext,
