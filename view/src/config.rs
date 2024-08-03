@@ -21,6 +21,7 @@ pub struct Config {
     pub resource_loader: Box<dyn ResourceLoader>,
     pub threads: bool,
 }
+
 impl Config {
     pub fn new(resource_loader: Box<dyn ResourceLoader>) -> Self {
         Config {

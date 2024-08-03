@@ -1,8 +1,17 @@
 mod context;
 pub mod config;
-pub mod gl;
-pub mod interactive;
-pub mod show;
-// pub mod wasm;
+pub mod view;
+pub mod native;
+pub mod wasm;
+// mod gl;
+// mod show;
 
+use pathfinder_geometry::vector::Vector2I;
 
+fn round_to_16(i: i32) -> i32 {
+    (i + 15) & !0xf
+}
+
+pub fn round_v_to_16(v: Vector2I) -> Vector2I {
+    Vector2I::new(round_to_16(v.x()), round_to_16(v.y()))
+}

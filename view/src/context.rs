@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use pathfinder_geometry::rect::RectF;
 use pathfinder_geometry::transform2d::Transform2F;
 use pathfinder_geometry::vector::{Vector2F, Vector2I};
@@ -19,7 +21,7 @@ pub struct Context<B: ViewBackend> {
     pub view_center: Vector2F,
     pub window_size: Vector2F, // in pixels
     pub scale_factor: f32,     // device dependend
-    pub config: Config,
+    pub config: Rc<Config>,
     pub bounds: Option<RectF>,
     pub close: bool,
     pub update_interval: Option<f32>,
@@ -30,8 +32,8 @@ pub struct Context<B: ViewBackend> {
 
 pub const DEFAULT_SCALE: f32 = 96.0 / 25.4;
 
-impl<B: ViewBackend> Context<B> {
-    pub fn new(config: Config, backend: B) -> Self {
+impl<'a, B: ViewBackend> Context<B> {
+    pub fn new(config: Rc<Config>, backend: B) -> Self {
         let (pixel_scroll_factor, line_scroll_factor) = backend.get_scroll_factors();
         Context {
             redraw_requested: true,
@@ -39,7 +41,7 @@ impl<B: ViewBackend> Context<B> {
             page_nr: 0,
             scale: DEFAULT_SCALE,
             scale_factor: 1.0,
-            config,
+            config: config.clone(),
             view_center: Vector2F::default(),
             window_size: Vector2F::default(),
             bounds: None,

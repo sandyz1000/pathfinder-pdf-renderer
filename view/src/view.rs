@@ -1,7 +1,7 @@
 use pathfinder_geometry::vector::Vector2F;
 use pathfinder_renderer::scene::Scene;
 use winit::{
-    event::{ElementState, KeyEvent},
+    event::{ElementState, KeyEvent, RawKeyEvent},
     keyboard::{KeyCode, ModifiersState, PhysicalKey},
 };
 use crate::context::{ViewBackend, Context, DEFAULT_SCALE};
@@ -35,7 +35,7 @@ pub trait Interactive: 'static {
         }
     }
 
-    fn keyboard_input(&mut self, ctx: &mut Context<Self::Backend>, modifiers: ModifiersState, event: KeyEvent) {
+    fn keyboard_input(&mut self, ctx: &mut Context<Self::Backend>, modifiers: ModifiersState, event: RawKeyEvent) {
         match (event.state, modifiers.control_key(), event.physical_key) {
             (ElementState::Pressed, false, PhysicalKey::Code(KeyCode::PageDown)) => ctx.next_page(),
             (ElementState::Pressed, false, PhysicalKey::Code(KeyCode::PageUp)) => ctx.prev_page(),

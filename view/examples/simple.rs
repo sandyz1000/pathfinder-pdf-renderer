@@ -2,13 +2,8 @@ use pathfinder_renderer::{
     scene::{Scene, DrawPath},
     paint::Paint,
 };
-use pathfinder_content::{
-    outline::{Outline, Contour},
-};
-use pathfinder_geometry::{
-    rect::RectF,
-    vector::{Vector2F, vec2f},
-};
+use pathfinder_content::outline::{Outline, Contour};
+use pathfinder_geometry::{rect::RectF, vector::vec2f};
 use pathfinder_color::ColorU;
 use pathfinder_resources::embedded::EmbeddedResourceLoader;
 use pdf_view::{show::show, config::Config};
