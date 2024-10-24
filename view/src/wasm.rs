@@ -8,9 +8,10 @@ use pathfinder_geometry::{
 use pathfinder_renderer::scene::Scene;
 use pdf::any::AnySync;
 use pdf::backend::Backend;
-use pdf::file::{Cache as PdfCache, File as PdfFile, Log};
+use pdf::file::{Cache as PdfCache, File as PdfFile, FileOptions, Log};
 use pdf::PdfError;
 use pdf_render::{page_bounds, render_page, Cache, SceneBackend};
+use std::path::Path;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -586,12 +587,10 @@ pub fn show(
     data: &js_sys::Uint8Array,
 ) -> WasmView {
     use pathfinder_resources::embedded::EmbeddedResourceLoader;
-
-    let data: Vec<u8> = data.to_vec();
-    log::info!("got {} bytes of data", data.len());
-    // let file = PdfFile::from_data(data).expect("failed to parse PDF");
-    // log::info!("got the file");
-    // let view = PdfView::new(file);
+    let file = Path::new("ummy-path.pdf");
+    let file = FileOptions::cached().open(file).expect("failed to parse PDF");
+    log::info!("got the file");
+    let view = PdfView::new(file);
 
     let mut config = Config::new(Box::new(EmbeddedResourceLoader));
     config.zoom = false;

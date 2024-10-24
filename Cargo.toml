@@ -4,7 +4,7 @@ members = [
     "view",
     "font",
     "glyph-matcher",
-    "encoding", 
+    "encoding",
     "rasterize",
     # TODO: Fix the bugs in example
     # "examples/*",
@@ -28,10 +28,10 @@ pdf = { git = "https://github.com/pdf-rs/pdf", default-features = false, rev = "
 
 itertools = "0.13.0"
 image = "0.25.2"
-instant = "*"
-custom_debug_derive = "*"
+instant = "0.1.13"
+custom_debug_derive = "0.6.1"
 globalcache = { git = "https://github.com/s3bk/cachelib", features = ["sync"] }
 istring = { git = "https://github.com/s3bk/istring" }
-once_cell = "1.19.0"
-serde_json = "1.0.120"
+once_cell = "1.20.2"
+serde_json = "1.0.132"
 log = { version = "0.4" }

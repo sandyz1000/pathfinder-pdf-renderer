@@ -6,7 +6,7 @@ use pathfinder_content::outline::{Outline, Contour};
 use pathfinder_geometry::{rect::RectF, vector::vec2f};
 use pathfinder_color::ColorU;
 use pathfinder_resources::embedded::EmbeddedResourceLoader;
-use pdf_view::{show::show, config::Config};
+use pdf_view::{native::show, config::Config};
 
 fn main() {
     env_logger::init();

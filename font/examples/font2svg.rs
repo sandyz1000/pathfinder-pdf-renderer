@@ -4,7 +4,7 @@ use std::env;
 use std::error::Error;
 use pathfinder_geometry::{
     vector::Vector2F,
-    transform2d::{Transform2F},
+    transform2d::Transform2F,
     rect::RectF
 };
 use pathfinder_content::outline::{Outline};

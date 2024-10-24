@@ -46,7 +46,7 @@ getrandom = { version = "0.2.3", features = ["js"] }
 
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.5.1"
 
 
 [target.'cfg(unix)'.dependencies]

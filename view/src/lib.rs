@@ -3,8 +3,6 @@ pub mod config;
 pub mod view;
 pub mod native;
 pub mod wasm;
-// mod gl;
-// mod show;
 
 use pathfinder_geometry::vector::Vector2I;
 
