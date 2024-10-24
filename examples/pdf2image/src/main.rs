@@ -1,7 +1,7 @@
 use argh::FromArgs;
 use pdf::file::{File, FileOptions};
 use pdf_render::{Cache, SceneBackend, render_page};
-use pathfinder_rasterize::Rasterizer;
+use rasterize::Rasterizer;
 use pathfinder_geometry::transform2d::Transform2F;
 use std::error::Error;
 

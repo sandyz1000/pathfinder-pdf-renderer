@@ -25,21 +25,20 @@ pathfinder_geometry = { workspace = true }
 pathfinder_content = { workspace = true }
 pathfinder_color = { workspace = true }
 tuple = { git = "https://github.com/s3bk/tuple/" }
-nom = "5.1"
-log = "0.4"
-rand = { version = "0.8.5" }
+nom = { workspace = true }
+log = { workspace = true }
+rand = { workspace = true }
 slotmap = { version = "1.0" }
 decorum = "0.3"
-itertools = "0.13.0"
-indexmap = "2.2.6"
+itertools = { workspace = true }
+indexmap = { workspace = true }
 brotli-decompressor = { version = "4.0.1", optional = true }
 inflate = { version = "0.4.5", optional = true }
-# svg_dom = { git = "https://github.com/sandyz1000/svg", optional = true, branch = "devel" }
+# svg = { path = "../svg", optional = true }
 istring = "0.4.0"
 
 [dev-dependencies]
-# svg_dom = { git = "https://github.com/sandyz1000/svg", branch = "devel" }
-# svg_draw = { git = "https://github.com/sandyz1000/svg", branch = "devel" }
+# svg = { path = "../svg", optional = true }
 pathfinder_renderer = { workspace = true }
 pathfinder_export = { workspace = true }
 walkdir = "2.3"

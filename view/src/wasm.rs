@@ -36,7 +36,7 @@ use pathfinder_renderer::options::{BuildOptions, RenderTransform};
 use crate::config::{view_box, Config, Icon};
 use crate::context::{Context, ViewBackend};
 use crate::round_v_to_16;
-use crate::view::{Emitter, Interactive};
+use crate::{Emitter, Interactive};
 
 pub struct PdfView<B: Backend, OC, SC, L> {
     file: PdfFile<B, OC, SC, L>,
@@ -576,7 +576,7 @@ pub fn window_size(window: &Window) -> Vector2F {
 #[wasm_bindgen(start)]
 pub fn run() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-    console_log::init_with_level(log::Level::Info);
+    let _ = console_log::init_with_level(log::Level::Info);
     warn!("test");
 }
 
@@ -595,6 +595,6 @@ pub fn show(
     let mut config = Config::new(Box::new(EmbeddedResourceLoader));
     config.zoom = false;
     config.pan = false;
-    // WasmView::new(canvas, context, config, Box::new(view) as _)
-    todo!()
+    let wasmview = WasmView::new(canvas, context, config, Box::new(view) as _);
+    wasmview
 }

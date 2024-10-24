@@ -12,10 +12,6 @@ workspace = true
 default-features = false
 features = ["dump"]
 
-# [dependencies.pathfinder_view]
-# git = "https://github.com/s3bk/pathfinder_view"
-# features = ["icon"]
-
 [dependencies]
 pathfinder_renderer = { workspace = true }
 pathfinder_geometry = { workspace = true }
@@ -44,13 +40,11 @@ console_log = "1.0.0"
 console_error_panic_hook = "0.1.6"
 getrandom = { version = "0.2.3", features = ["js"] }
 
-
 [dev-dependencies]
 criterion = "0.5.1"
 
-
 [target.'cfg(unix)'.dependencies]
-env_logger = "0.11.5"
+env_logger = { workspace = true }
 pathfinder_gl = { workspace = true }
 gl = "0.14.0"
 glutin = "0.32.0"

@@ -5,7 +5,7 @@ use crate::config::{Config, Icon};
 use crate::context::{Context, ViewBackend};
 
 use crate::round_v_to_16;
-use crate::view::{Emitter, Interactive};
+use crate::{Emitter, Interactive};
 
 use pathfinder_geometry::vector::vec2f;
 use pathfinder_renderer::options::{BuildOptions, RenderTransform};
