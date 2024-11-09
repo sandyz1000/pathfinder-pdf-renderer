@@ -1,12 +1,10 @@
 use crate::backend::Stroke;
 use crate::font::{load_font, StandardCache};
 use crate::{
-    backend::{BlendMode, FillMode},
-    BBox, Backend, DrawMode, Fill, FontEntry, TextSpan,
+    backend::{BlendMode, FillMode}, Backend, DrawMode, FontEntry, TextSpan,
 };
 use font::Glyph;
 use globalcache::sync::SyncCache;
-use pathfinder_content::stroke::StrokeStyle;
 use pathfinder_content::{fill::FillRule, outline::Outline};
 use pathfinder_geometry::{rect::RectF, transform2d::Transform2F, vector::Vector2F};
 use pdf::error::PdfError;

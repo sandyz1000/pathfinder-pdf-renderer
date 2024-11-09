@@ -5,7 +5,7 @@ use pdf::primitive::{Primitive, Dictionary};
 use pdf::content::{Op, Matrix, Point, Rect, Color, Rgb, Cmyk, Winding, FormXObject};
 use pdf::error::{PdfError, Result};
 use pdf::content::TextDrawAdjusted;
-use crate::backend::{Backend, BlendMode, Stroke, FillMode};
+use crate::backend::{Backend, BlendMode, FillMode};
 
 use pathfinder_geometry::{
     vector::Vector2F,

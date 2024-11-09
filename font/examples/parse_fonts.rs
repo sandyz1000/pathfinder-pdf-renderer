@@ -3,11 +3,10 @@
 //#[global_allocator]
 //static ALLOC: Jemalloc = Jemalloc;
 
-use font::{parse, Font};
+use font::parse;
 use std::fs;
 use std::path::Path;
 use std::panic::catch_unwind;
-use pathfinder_content::outline::Outline;
 use walkdir::WalkDir;
 use env_logger;
 

@@ -1,4 +1,4 @@
-use image::{RgbaImage, ImageBuffer, Rgba};
+use image::{ImageBuffer, Rgba};
 use pdf::object::*;
 use pdf::error::PdfError;
 use pathfinder_color::ColorU;

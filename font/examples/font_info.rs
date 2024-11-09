@@ -3,7 +3,7 @@
 //#[global_allocator]
 //static ALLOC: Jemalloc = Jemalloc;
 
-use font::{font_info, Font};
+use font::font_info;
 use std::fs::File;
 use std::path::Path;
 use walkdir::WalkDir;

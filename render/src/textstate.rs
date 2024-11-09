@@ -1,5 +1,5 @@
 use crate::{
-    backend::{FillMode, Stroke},
+    backend::FillMode,
     BlendMode,
 };
 use font::GlyphId;
@@ -8,7 +8,6 @@ use pathfinder_geometry::{transform2d::Transform2F, vector::Vector2F};
 use super::{
     fontentry::FontEntry, graphicsstate::GraphicsState, BBox, Backend, DrawMode, TextChar,
 };
-use istring::SmallString;
 use itertools::Either;
 use pdf::content::TextMode;
 use std::convert::TryInto;
