@@ -15,7 +15,7 @@ use pathfinder_renderer::{
 };
 use pathfinder_color::ColorU;
 use pathfinder_export::{Export, FileFormat};
-use svg_draw::draw_glyph;
+use svg::draw::draw_glyph;
 
 fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();

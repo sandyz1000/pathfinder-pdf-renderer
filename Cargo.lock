@@ -242,9 +242,9 @@ checksum = "175571dd1d178ced59193a6fc02dde1b972eb0bc56c892cde9beeceac5bf0f6b"
 
 [[package]]
 name = "async-trait"
-version = "0.1.74"
+version = "0.1.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a66537f1bb974b254c98ed142ff995236e81b9d0fe4db0575f46612cb15eb0f9"
+checksum = "721cae7de5c34fbb2acd27e21e6d2cf7b886dce0c27388d46c4e6c47ea4318dd"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1136,7 +1136,7 @@ dependencies = [
  "pdf_encoding",
  "rand",
  "slotmap",
- "tuple 0.5.1 (git+https://github.com/s3bk/tuple/)",
+ "tuple 0.5.1",
  "walkdir",
 ]
 
@@ -1250,21 +1250,24 @@ dependencies = [
 
 [[package]]
 name = "globalcache"
-version = "0.2.0"
-source = "git+https://github.com/s3bk/cachelib#6a820d1f5505f6e052730f01c7350f1764600141"
-dependencies = [
- "async-trait",
- "tuple 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "globalcache"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "240a3059d86f2ba6859ac79f95ff94e65606abc775c1bc0ecf9b6590fb35dc04"
 dependencies = [
  "async-trait",
- "tuple 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tuple 0.5.2",
+ "web-time",
+]
+
+[[package]]
+name = "globalcache"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f07c02868ebe3ffab0c273801b815f19a9fc05743b5b9da971449dd40604fe30"
+dependencies = [
+ "async-trait",
+ "rustc-hash",
+ "tuple 0.5.2",
  "web-time",
 ]
 
@@ -2515,7 +2518,7 @@ dependencies = [
  "custom_debug_derive",
  "env_logger",
  "font",
- "globalcache 0.2.0",
+ "globalcache 0.3.2",
  "glyphmatcher",
  "image 0.25.2",
  "instant",
@@ -2563,7 +2566,7 @@ dependencies = [
  "pdf_render",
  "raw-window-handle",
  "structopt",
- "tuple 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tuple 0.5.2",
  "wasm-bindgen",
  "web-sys",
  "winit",
@@ -2966,6 +2969,12 @@ name = "rust_hawktracer_proc_macro"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb626abdbed5e93f031baae60d72032f56bc964e11ac2ff65f2ba3ed98d6d3e1"
+
+[[package]]
+name = "rustc-hash"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "583034fd73374156e66797ed8e5b0d5690409c9226b22d87cb7f19821c05d152"
 
 [[package]]
 name = "rustc_version"
@@ -3492,8 +3501,7 @@ checksum = "8686b91785aff82828ed725225925b33b4fde44c4bb15876e5f7c832724c420a"
 [[package]]
 name = "tuple"
 version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39a40ba241047e1174c927dc5f61c141a166b938d61a2ff61838441368cc7d0e"
+source = "git+https://github.com/s3bk/tuple/#8eacd6eae56691f926b92ff3fcd77012135ee812"
 dependencies = [
  "num-traits",
  "serde",
@@ -3501,8 +3509,9 @@ dependencies = [
 
 [[package]]
 name = "tuple"
-version = "0.5.1"
-source = "git+https://github.com/s3bk/tuple/#8eacd6eae56691f926b92ff3fcd77012135ee812"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bb9f6bd73479481158ba8ee3edf17aca93354623d13f02e96a2014fdbc1c37e"
 dependencies = [
  "num-traits",
  "serde",

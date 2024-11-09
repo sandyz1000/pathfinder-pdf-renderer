@@ -1,25 +1,19 @@
-use crate::{TextSpan, DrawMode, Backend, FontEntry, Fill, backend::{BlendMode, FillMode}, BBox};
-use pathfinder_content::{
-    outline::Outline,
-    fill::FillRule,
-};
-use pathfinder_geometry::{
-    rect::RectF,
-    transform2d::Transform2F,
-    vector::Vector2F,
-};
-use pathfinder_content::{
-    stroke::{StrokeStyle},
-}; 
-use pdf::object::{Ref, XObject, ImageXObject, Resolve, Resources, MaybeRef};
-use font::Glyph;
-use pdf::font::Font as PdfFont;
-use pdf::error::PdfError;
-use std::sync::Arc;
-use std::path::PathBuf;
-use crate::font::{load_font, StandardCache};
-use globalcache::sync::SyncCache;
 use crate::backend::Stroke;
+use crate::font::{load_font, StandardCache};
+use crate::{
+    backend::{BlendMode, FillMode},
+    BBox, Backend, DrawMode, Fill, FontEntry, TextSpan,
+};
+use font::Glyph;
+use globalcache::sync::SyncCache;
+use pathfinder_content::stroke::StrokeStyle;
+use pathfinder_content::{fill::FillRule, outline::Outline};
+use pathfinder_geometry::{rect::RectF, transform2d::Transform2F, vector::Vector2F};
+use pdf::error::PdfError;
+use pdf::font::Font as PdfFont;
+use pdf::object::{ImageXObject, MaybeRef, Ref, Resolve, Resources, XObject};
+use std::path::PathBuf;
+use std::sync::Arc;
 
 pub struct ClipPath {
     pub path: Outline,
@@ -44,7 +38,7 @@ pub struct TraceCache {
 fn font_key(font_ref: &MaybeRef<PdfFont>) -> u64 {
     match font_ref {
         MaybeRef::Direct(ref shared) => shared.as_ref() as *const PdfFont as _,
-        MaybeRef::Indirect(re) => re.get_ref().get_inner().id as _
+        MaybeRef::Indirect(re) => re.get_ref().get_inner().id as _,
     }
 }
 impl TraceCache {
@@ -56,9 +50,13 @@ impl TraceCache {
             std: StandardCache::new(standard_fonts),
         }
     }
-    pub fn get_font(&self, font_ref: &MaybeRef<PdfFont>, resolve: &impl Resolve) -> Result<Option<Arc<FontEntry>>, PdfError> {
+    pub fn get_font(
+        &self,
+        font_ref: &MaybeRef<PdfFont>,
+        resolve: &impl Resolve,
+    ) -> Result<Option<Arc<FontEntry>>, PdfError> {
         let mut error = None;
-        let val = self.fonts.get(font_key(font_ref), || 
+        let val = self.fonts.get(font_key(font_ref), |_| {
             match load_font(font_ref, resolve, &self.std) {
                 Ok(Some(f)) => Some(Arc::new(f)),
                 Ok(None) => None,
@@ -67,10 +65,10 @@ impl TraceCache {
                     None
                 }
             }
-        );
+        });
         match error {
             None => Ok(val),
-            Some(e) => Err(e)
+            Some(e) => Err(e),
         }
     }
     pub fn require_unique_unicode(&mut self, require_unique_unicode: bool) {
@@ -97,7 +95,12 @@ impl<'a> Tracer<'a> {
 impl<'a> Backend for Tracer<'a> {
     type ClipPathId = ClipPathId;
 
-    fn create_clip_path(&mut self, path: Outline, fill_rule: FillRule, parent: Option<ClipPathId>) -> ClipPathId {
+    fn create_clip_path(
+        &mut self,
+        path: Outline,
+        fill_rule: FillRule,
+        parent: Option<ClipPathId>,
+    ) -> ClipPathId {
         let id = ClipPathId(self.clip_paths.len());
         self.clip_paths.push(ClipPath {
             path,
@@ -106,16 +109,31 @@ impl<'a> Backend for Tracer<'a> {
         });
         id
     }
-    fn draw(&mut self, outline: &Outline, mode: &DrawMode, _fill_rule: FillRule, transform: Transform2F, clip: Option<ClipPathId>) {
+    fn draw(
+        &mut self,
+        outline: &Outline,
+        mode: &DrawMode,
+        _fill_rule: FillRule,
+        transform: Transform2F,
+        clip: Option<ClipPathId>,
+    ) {
         let stroke = match mode {
-            DrawMode::FillStroke { stroke, stroke_mode, .. } | DrawMode::Stroke { stroke, stroke_mode } => Some((stroke.clone(), stroke_mode.clone())),
+            DrawMode::FillStroke {
+                stroke,
+                stroke_mode,
+                ..
+            }
+            | DrawMode::Stroke {
+                stroke,
+                stroke_mode,
+            } => Some((stroke.clone(), stroke_mode.clone())),
             DrawMode::Fill { .. } => None,
         };
         self.items.push(DrawItem::Vector(VectorPath {
             outline: outline.clone(),
             fill: match mode {
                 DrawMode::Fill { fill } | DrawMode::FillStroke { fill, .. } => Some(fill.clone()),
-                _ => None
+                _ => None,
             },
             stroke,
             transform,
@@ -126,25 +144,59 @@ impl<'a> Backend for Tracer<'a> {
     fn set_view_box(&mut self, r: RectF) {
         self.view_box = r;
     }
-    fn draw_image(&mut self, xref: Ref<XObject>, _im: &ImageXObject, _resources: &Resources, transform: Transform2F, mode: BlendMode, clip: Option<ClipPathId>, _resolve: &impl Resolve) {
-        let rect = transform * RectF::new(
-            Vector2F::new(0.0, 0.0), Vector2F::new(1.0, 1.0)
-        );
+    fn draw_image(
+        &mut self,
+        xref: Ref<XObject>,
+        _im: &ImageXObject,
+        _resources: &Resources,
+        transform: Transform2F,
+        mode: BlendMode,
+        clip: Option<ClipPathId>,
+        _resolve: &impl Resolve,
+    ) {
+        let rect = transform * RectF::new(Vector2F::new(0.0, 0.0), Vector2F::new(1.0, 1.0));
         self.items.push(DrawItem::Image(ImageObject {
-            rect, id: xref, transform, op_nr: self.op_nr, mode, clip
+            rect,
+            id: xref,
+            transform,
+            op_nr: self.op_nr,
+            mode,
+            clip,
         }));
     }
-    fn draw_inline_image(&mut self, im: &Arc<ImageXObject>, _resources: &Resources, transform: Transform2F, mode: BlendMode, clip: Option<ClipPathId>, _resolve: &impl Resolve) {
-        let rect = transform * RectF::new(
-            Vector2F::new(0.0, 0.0), Vector2F::new(1.0, 1.0)
-        );
+    fn draw_inline_image(
+        &mut self,
+        im: &Arc<ImageXObject>,
+        _resources: &Resources,
+        transform: Transform2F,
+        mode: BlendMode,
+        clip: Option<ClipPathId>,
+        _resolve: &impl Resolve,
+    ) {
+        let rect = transform * RectF::new(Vector2F::new(0.0, 0.0), Vector2F::new(1.0, 1.0));
 
         self.items.push(DrawItem::InlineImage(InlineImageObject {
-            rect, im: im.clone(), transform, op_nr: self.op_nr, mode, clip
+            rect,
+            im: im.clone(),
+            transform,
+            op_nr: self.op_nr,
+            mode,
+            clip,
         }));
     }
-    fn draw_glyph(&mut self, _glyph: &Glyph, _mode: &DrawMode, _transform: Transform2F, clip: Option<ClipPathId>) {}
-    fn get_font(&mut self, font_ref: &MaybeRef<PdfFont>, resolve: &impl Resolve) -> Result<Option<Arc<FontEntry>>, PdfError> {
+    fn draw_glyph(
+        &mut self,
+        _glyph: &Glyph,
+        _mode: &DrawMode,
+        _transform: Transform2F,
+        clip: Option<ClipPathId>,
+    ) {
+    }
+    fn get_font(
+        &mut self,
+        font_ref: &MaybeRef<PdfFont>,
+        resolve: &impl Resolve,
+    ) -> Result<Option<Arc<FontEntry>>, PdfError> {
         self.cache.get_font(font_ref, resolve)
     }
     fn add_text(&mut self, span: TextSpan, clip: Option<Self::ClipPathId>) {

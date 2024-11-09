@@ -64,11 +64,11 @@ pub trait Interactive: 'static {
         "A fantastic window!".into()
     }
     
-    fn event(&mut self, ctx: &mut Context<Self::Backend>, event: Self::Event) {}
+    fn event(&mut self, _ctx: &mut Context<Self::Backend>, event: Self::Event) {}
     
     fn init(&mut self, ctx: &mut Context<Self::Backend>, sender: Emitter<Self::Event>);
     
-    fn idle(&mut self, ctx: &mut Context<Self::Backend>) {}
+    fn idle(&mut self, _ctx: &mut Context<Self::Backend>) {}
     
     fn window_size_hint(&self) -> Option<Vector2F> {
         None
